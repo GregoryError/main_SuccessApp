@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/new/prefix1"/>
+    <qresource prefix="/">
+        <file>client.crt</file>
+        <file>client.key</file>
+        <file>server.crt</file>
+        <file>fonts/openSansCondensed_Light.ttf</file>
+        <file>fonts/poiretOneRegular.ttf</file>
+        <file>Menu/eye.png</file>
+        <file>Menu/report_issue.png</file>
+        <file>Menu/tick.png</file>
+        <file>icons/5stars.png</file>
+        <file>Menu/shareBtn.png</file>
+    </qresource>
+    <qresource prefix="/first"/>
+</RCC>
