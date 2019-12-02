@@ -45,6 +45,10 @@ MyClient::MyClient(QWidget* pwgt) : QObject(pwgt), m_nNextBlockSize(0)
         Sender("(" + dataSet.value("name").toString()
                + "#" + dataSet.value("pass").toString()
                + ")getAllData!");
+
+
+    qDebug() << QSslSocket::supportsSsl() << QSslSocket::sslLibraryBuildVersionString() << QSslSocket::sslLibraryVersionString();
+
 }
 
 // ----------------------------------------------------------------------
@@ -54,7 +58,7 @@ void MyClient::slotReadyRead()
     // m_pTcpSocket->waitForReadyRead();
 
     QDataStream in(m_pTcpSocket.data());
-    in.setVersion(QDataStream::Qt_5_13);
+    in.setVersion(QDataStream::Qt_5_12);
 
     for(;;)
     {

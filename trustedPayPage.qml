@@ -46,18 +46,24 @@ Item {
 
 
 
-    Rectangle{
-        id: backRect
+    //    Rectangle{
+    //        id: backRect
+    //        anchors.fill: parent
+    //        color: "#f7f7f7"
+
+    Image {
+        id: backGroundTP
+        source: "qrc:/trustedBack.png"
         anchors.fill: parent
-        color: "#f7f7f7"
+
 
         Component.onCompleted: focus = true;
 
         Flickable{
             id: trustedFlick
-            width: backRect.width
-            height: backRect.height
-            anchors.horizontalCenter: backRect.horizontalCenter
+            width: backGroundTP.width
+            height: backGroundTP.height
+            anchors.horizontalCenter: backGroundTP.horizontalCenter
             contentHeight: trustButton.y + trustButton.height + 100
             contentWidth: parent.width
             smooth: true
@@ -65,16 +71,6 @@ Item {
             interactive: true
             maximumFlickVelocity: 1000000
             clip: true
-
-
-            Image {
-                id: backGroundTP
-                source: "qrc:/trustedBack.png"
-                width: mainTP.width
-                height: trustedFlick.contentHeight
-                opacity: 0.8
-            }
-
 
             Text {
                 id: trustedTXT
@@ -188,8 +184,8 @@ Item {
                 anchors.horizontalCenter: trustedTXT.horizontalCenter
                 anchors.top: control.bottom
                 anchors.topMargin: 30
-                width: backRect.width * 0.4
-                height: backRect.width / 5
+                width: backGroundTP.width * 0.4
+                height: backGroundTP.width / 5
 
                 Rectangle{
                     id: backOfButton
@@ -214,7 +210,6 @@ Item {
                         }
                     }
 
-
                     Text {
                         id: trButtTxt
                         anchors.centerIn: parent
@@ -223,7 +218,6 @@ Item {
                         color: "white"
                         text: "Подключить"
                     }
-
 
                 }
 

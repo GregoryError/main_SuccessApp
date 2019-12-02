@@ -7,7 +7,6 @@ Item {
         id: backGroundTP
         source: "qrc:/trustedBack.png"
         anchors.fill: parent
-        // opacity: 0.9
 
         Flickable{
             id: trustedFlick
@@ -22,6 +21,7 @@ Item {
             maximumFlickVelocity: 1000000
             clip: true
 
+
             Text {
                 id: aboutTxt
                 anchors.top: parent.top
@@ -31,7 +31,9 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 horizontalAlignment: Text.AlignHCenter
                 // 36_armeabi_v7a   38_armeabi_v7a   39_arm_v8a
-                text: "Успех личный кабинет код версии: 40_arm_v8a <br>
+                // 40_v7a_API_23-28  38_v7a_API_19-22
+                text: "    Успех личный кабинет код версии: <br>
+                           43_v8_API_23-28 <br>
                            Данное приложение издается как <br>
                            приложение с открытым исходным кодом, <br>
                            оно является бесплатым <br>
@@ -69,12 +71,12 @@ Item {
             Text {
                 id: e_mail
                 anchors.top: aboutTxt.bottom
-                anchors.topMargin: 35
-                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.topMargin: 45
+                anchors.horizontalCenter: aboutTxt.horizontalCenter
                 horizontalAlignment: Text.AlignHCenter
-                font.pointSize: 25
+                font.pointSize: 18
                 color: "white"
-                text: "errorgrisha@gmail.com"
+                text: "<br><br>errorgrisha@gmail.com"
             }
         }
     }
