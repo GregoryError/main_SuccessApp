@@ -17,8 +17,6 @@
 #include <cmath>
 
 
-
-
 //#include <QSplashScreen>
 //#include <QPixmap>
 

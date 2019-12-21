@@ -19,7 +19,6 @@
 //#include <QList>
 //#include <QTimer>
 
-
 // ======================================================================
 
 
@@ -47,14 +46,11 @@ public:
     int Port;
     QVector<QString> times_vct, cashes_vct, comments_vct;
     QString serverDateTime;
-
     QMap<int, QString> msg_lines;
-
-
     QSettings dataSet;
     QString enteredName;
     QString enteredPass;
-    QString loginResult = "По каким то причинам<br>не удается войти в систему.<br>"
+    QString loginResult = "По каким-то причинам<br>не удается войти в систему.<br>"
                           "Проверьте сетевое подключение.";
     bool isAuthOk = false;        ///////////////////// ?
     bool isConnect = false;
