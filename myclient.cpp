@@ -4,6 +4,9 @@
 #include <QSslKey>
 #include <QCryptographicHash>
 
+#include <QSslKey>
+#include <algorithm>
+
 // ----------------------------------------------------------------------
 // (len1-29c#h7rJ2Pn4)getAllData!
 // (len1-29c#h7rJ2Pn4)showPlan:59
@@ -11,11 +14,7 @@
 
 MyClient::MyClient(QWidget* pwgt) : QObject(pwgt), m_nNextBlockSize(0)
 {
-
-    //dataSet.setValue("isEntered", false);
-
-    // m_pTcpSocket = new QSslSocket(this);
-
+    acc_check = false;
 
     m_pTcpSocket.reset(new QSslSocket(this));
 
@@ -26,7 +25,25 @@ MyClient::MyClient(QWidget* pwgt) : QObject(pwgt), m_nNextBlockSize(0)
 
     SSL_conf.setCaCertificates(rootCACert);
 
-    const QString keyPath(":/client.key");
+
+     const QString keyPath("/client.key");
+
+
+
+
+
+    QFile keyFile(QDir::currentPath() + keyPath);                     // it wasnt here but should be
+    bool openOk = keyFile.open(QIODevice::ReadWrite);
+    qDebug() << "key open ok = " << openOk; //ok
+    qDebug() << keyFile.readAll(); //not empty
+    QSslKey sslKey(keyFile.readAll(), QSsl::Rsa, QSsl::Der, QSsl::PrivateKey);
+    qDebug()<< "key valid = " << !sslKey.isNull(); //**is null**
+    SSL_conf.setPrivateKey(sslKey);
+
+
+
+
+
 
     m_pTcpSocket->setSslConfiguration(SSL_conf);
 
@@ -45,18 +62,12 @@ MyClient::MyClient(QWidget* pwgt) : QObject(pwgt), m_nNextBlockSize(0)
         Sender("(" + dataSet.value("name").toString()
                + "#" + dataSet.value("pass").toString()
                + ")getAllData!");
-
-
-    qDebug() << QSslSocket::supportsSsl() << QSslSocket::sslLibraryBuildVersionString() << QSslSocket::sslLibraryVersionString();
-
 }
 
 // ----------------------------------------------------------------------
 
 void MyClient::slotReadyRead()
-{
-    // m_pTcpSocket->waitForReadyRead();
-
+{   
     QDataStream in(m_pTcpSocket.data());
     in.setVersion(QDataStream::Qt_5_12);
 
@@ -79,166 +90,138 @@ void MyClient::slotReadyRead()
         m_nNextBlockSize = 0;
     }
 
-    // qDebug() << "FROM SOCKET: " << m_ptxtInfo;
-
-    if(m_ptxtInfo.length() > 10 && m_ptxtInfo.mid(0, 11) == "getAllData!")
+    if (!acc_check)
     {
-        //idNumber, balance, state, pay_day, paket;
-        idNumber.clear();
-        balance.clear();
-        state.clear();
-        pay_day.clear();
-        paket.clear();
-        isAuthOk = true;
 
-        //        if (!dataSet.value("isEntered").toBool())
-        //        {
-        //            dataSet.setValue("isEntered", true);
-        //            dataSet.setValue("name", enteredName);
-        //            dataSet.setValue("pass", enteredPass);
-        //            // dataSet.setValue("value", 0);
-        //            // dataSet.setValue("is_Show_Val_Wnd", true);
-        //        }
-
-
-        //        if (!dataSet.contains("is_Show_Val_Wnd")) {
-        //            dataSet.setValue("value", 0);
-        //            dataSet.setValue("is_Show_Val_Wnd", true);
-        //        }
-
-
-        //        auto launch_ind = dataSet.value("value").toInt();
-        //        ++launch_ind;
-        //        dataSet.setValue("value", launch_ind);
-
-
-        QString temp(m_ptxtInfo.mid(27));
-        serverDateTime = m_ptxtInfo.mid(11, 16);
-
-        short space(0);
-        for(auto& c:temp)
+        if (m_ptxtInfo.length() > 10 && m_ptxtInfo.mid(0, 11) == "getAllData!")
         {
-            if (space == 0 && c != ' ')
+            //idNumber, balance, state, pay_day, paket;
+            idNumber.clear();
+            balance.clear();
+            state.clear();
+            pay_day.clear();
+            paket.clear();
+            isAuthOk = true;
+
+            QString temp(m_ptxtInfo.mid(27));
+            serverDateTime = m_ptxtInfo.mid(11, 16);
+
+            short space(0);
+            for(auto& c:temp)
             {
-                idNumber+= c;
+                if (space == 0 && c != ' ')
+                {
+                    idNumber+= c;
+                }
+
+                if (space == 1 && c != ' ')
+                {
+                    balance += c;
+                }
+
+                if (space == 2 && c != ' ')
+                {
+                    state += c;
+                }
+
+                if (space == 3 && c != ' ')
+                {
+                    pay_day += c;
+                }
+
+                if (space >= 4)
+                {
+                    paket += c;
+                }
+
+                if (c == ' ')
+                    ++space;
             }
 
-            if (space == 1 && c != ' ')
+            if(pay_day.toInt() == 0)
             {
-                balance += c;
+                int day_tmp = pay_day.toInt();
+                ++day_tmp;
+                pay_day = QString::number(day_tmp);
             }
 
-            if (space == 2 && c != ' ')
+
+            emit startReadInfo();
+
+            if (!dataSet.value("isEntered").toBool())
             {
-                state += c;
+                dataSet.setValue("isEntered", true);
+                dataSet.setValue("name", enteredName);
+                dataSet.setValue("pass", enteredPass);
+
+                qDebug() << "enteredPass" << enteredPass;
+                if (addAccaunt(enteredName, enteredPass, no_hash))
+                    qDebug() << "Accaunt added: " << dataSet.value(enteredName).toString();
+                else
+                    qDebug() << "Wasnt added";
             }
 
-            if (space == 3 && c != ' ')
-            {
-                pay_day += c;
-            }
+            dataSet.setValue("id", idNumber);
 
-            if (space >= 4)
-            {
-                paket += c;
-            }
+            // тут везде надо оставить только проверку на начальные слоги set, get, ask...
+        }
+        else if (m_ptxtInfo.length() > 10 && m_ptxtInfo.mid(0, 12) == "askPayments!")
+        {
+            payments = m_ptxtInfo;
+            showPayments();
 
-            if (c == ' ')
-                ++space;
+        }
+        else if (m_ptxtInfo.mid(0, 11) == "askForMsgs!")
+        {
+
+            msgs = m_ptxtInfo.mid(11);
+            showMsgs();
+        }
+        else if (m_ptxtInfo == "requestTrustedPay!PayDenied")
+        {
+            emit trustedPayDenied();
+
+        }
+        else if (m_ptxtInfo == "requestTrustedPay!PayOk")
+        {
+            emit trustedPayOk();
+        }
+        else if(m_ptxtInfo == "denied")
+        {
+            isAuthOk = false;
+            loginResult = "Неверная авторизация";
+            switchToMe();
         }
 
-        if(pay_day.toInt() == 0)
+    }
+    else                     // TODO can add "emit badPasswore()" message
+    {
+        if (m_ptxtInfo.length() > 10 && m_ptxtInfo.mid(0, 11) == "getAllData!")
         {
-            int day_tmp = pay_day.toInt();
-            ++day_tmp;
-            pay_day = QString::number(day_tmp);
+            qDebug() << "myClient::goodValidation()";
+            emit goodValidation();
         }
-
-        //        dataSet.setValue("id", idNumber);
-
-        emit startReadInfo();
-
-        if (!dataSet.value("isEntered").toBool())
-        {
-            dataSet.setValue("isEntered", true);
-            dataSet.setValue("name", enteredName);
-            dataSet.setValue("pass", enteredPass);
-            // dataSet.setValue("value", 0);
-            // dataSet.setValue("is_Show_Val_Wnd", true);
-        }
-
-        dataSet.setValue("id", idNumber);
-
-        // тут везде надо оставить только проверку на начальные слоги set, get, ask...
+        else
+            emit accessDenied();
+        acc_check = false;
     }
-    else if (m_ptxtInfo.length() > 10 && m_ptxtInfo.mid(0, 12) == "askPayments!")
-    {
-        payments = m_ptxtInfo;
-        showPayments();
-
-    }
-    else if (m_ptxtInfo.mid(0, 11) == "askForMsgs!")
-    {
-
-        msgs = m_ptxtInfo.mid(11);
-        showMsgs();
-
-    }
-    else if (m_ptxtInfo == "requestTrustedPay!PayDenied")
-    {
-        emit trustedPayDenied();
-
-    }
-    else if (m_ptxtInfo == "requestTrustedPay!PayOk")
-    {
-        emit trustedPayOk();
-    }
-    else if(m_ptxtInfo == "denied"){
-        isAuthOk = false;
-        loginResult = "Неверная авторизация";
-        switchToMe();
-    }
-    //    else
-    //    {
-    //        isAuthOk = false;
-    //        loginResult = "Для работы приложения<br>"
-    //                      "необходимо подключение<br>"
-    //                      "к интернет, либо к сети<br>"
-    //                      "Аррива. Проверьте подключение,<br>"
-    //                      "либо обратитесь в тех. поддержку.";
-    //        switchToMe();
-    //    }
-
 
     m_ptxtInfo.clear();
-
-    // Saving user settings
-
-    // qDebug() << idNumber;
-    // qDebug() << balance;
-    // qDebug() << "STATE: " <<  state;
-    // qDebug() << pay_day;
-    // qDebug() << paket;
-
-
-    //    if (isAuthOk)
-    //        sendToken();
 }
 
 void MyClient::checkState()
 {
-   // qDebug() << m_pTcpSocket->state();
+    // qDebug() << m_pTcpSocket->state();
 }
 
 void MyClient::closeIfInProcess()
 {
-   // qDebug() << "closeIfInProcess";
+    // qDebug() << "closeIfInProcess";
     if (m_pTcpSocket->state() == QAbstractSocket::ConnectingState ||
             m_pTcpSocket->state() == QAbstractSocket::ConnectedState) {
         m_pTcpSocket->abort();
         m_pTcpSocket->disconnectFromHost();
     }
-
 }
 
 bool MyClient::isConnectingState()
@@ -267,7 +250,7 @@ void MyClient::sendIssueMsg()
 
 bool MyClient::is_Show_Val_Quest()
 {
-    return dataSet.value("is_Show_Val_Wnd").toBool() && dataSet.value("value").toInt() % 20 == 0;
+    return dataSet.value("is_Show_Val_Wnd").toBool() && dataSet.value("value").toInt() % 30 == 0;
 }
 
 void MyClient::set_Show_Val_toFalse()
@@ -279,7 +262,7 @@ void MyClient::set_Show_Val_toFalse()
 void MyClient::Sender(const QString &msg)
 {
     msgToSend = msg;
-    //qDebug() << "Sended msg: " << msgToSend;
+    qDebug() << "Sended msg: " << msgToSend;
 
     connectToHost();
 
@@ -370,7 +353,6 @@ void MyClient::quitAndClear()
 
 
     // dataSet.clear();                       // erase then
-
 
     idNumber.clear();
     balance.clear();
@@ -463,16 +445,10 @@ void MyClient::makeBusyOFF()
 
 void MyClient::fillHomePage()
 {
-    Sender("(" + dataSet.value("id").toString() + "#" + dataSet.value("pass").toString() + ")getAllData!");
+    Sender("(" + dataSet.value("name").toString() + "#" + dataSet.value("pass").toString() + ")getAllData!");
 
     // emit startReadInfo();
 }
-
-//void MyClient::fillPaysPage()
-//{
-//    emit startReadPays();
-//}
-
 
 void MyClient::showPayments()
 {
@@ -577,6 +553,16 @@ void MyClient::sendMsgs(QString str)
 
 }
 
+QString MyClient::giveMsgLine(int index)
+{
+    // TODO: find sequence like "http" "https" "www" and replace them with <a> SEQUENCE </a> till first gap
+
+
+
+
+    return msg_lines.value(index);
+}
+
 void MyClient::showMsgs()
 {
     //   Продлил до 08.06.16 01:27~time:1464906536~end()
@@ -647,7 +633,7 @@ QString MyClient::nextPayDay()
     int currentYear = serverDateTime.mid(6, 4).toInt();
 
     int yearArr[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    if (currentDate.mid(6, 4).toInt() % 4 == 0)
+    if (currentDate.mid(6, 4).toInt() % 4 == 0)      // если год весокосный
         yearArr[1] = 29;
 
     QString dd = currentDate.mid(0, 2);
@@ -781,16 +767,6 @@ void MyClient::copyToBuf()
 
 void MyClient::postWorker()
 {
-//    if (!dataSet.value("isEntered").toBool())
-//    {
-//        dataSet.setValue("isEntered", true);
-//        dataSet.setValue("name", enteredName);
-//        dataSet.setValue("pass", enteredPass);
-//        dataSet.setValue("id", idNumber);
-//        // dataSet.setValue("value", 0);
-//        // dataSet.setValue("is_Show_Val_Wnd", true);
-//    }
-
     if (!dataSet.contains("is_Show_Val_Wnd")) {
         dataSet.setValue("value", 0);
         dataSet.setValue("is_Show_Val_Wnd", true);
@@ -801,41 +777,102 @@ void MyClient::postWorker()
     dataSet.setValue("value", launch_ind);
 
     sendToken();
-
 }
 
+QString MyClient::showActiveName()
+{
+    return dataSet.value("name").toString();
+}
+
+bool MyClient::addAccaunt(QString name, QString pass, add_method need_hs)
+{
+    bool have_same = false;
+    QStringList tmp_list;
+    if (dataSet.value("accList").isValid())
+        tmp_list = dataSet.value("accList").toStringList();
+    for (int i = 0; i < tmp_list.size(); ++i)
+        if (tmp_list[i] == name)
+            have_same = true;
+
+    if (!have_same)
+    {
+        // add name to accList
+        tmp_list += name;
+        dataSet.setValue("accList", tmp_list);
+
+        QString hashedPass;
+        if (need_hs == need_hash)
+        {
+            QCryptographicHash passHash(QCryptographicHash::Keccak_256);        // transformation password to its hash
+            passHash.addData(pass.toUtf8());
+            hashedPass = QString::fromStdString(passHash.result().toHex().toStdString());
+        }
+
+        if (need_hs == no_hash)
+            hashedPass = pass;
+
+        dataSet.setValue(name, hashedPass);                                  // make log-pass record
+
+        return true;
+    }
+    return false;
+}
+
+int MyClient::accauntListSize()
+{
+    return dataSet.value("accList").toStringList().size();
+}
+
+QString MyClient::getAccauntName(int ind)                             // show the name by index
+{
+    return dataSet.value("accList").toStringList()[ind];
+}
+
+void MyClient::switchToAccaunt(QString name)
+{
+    quitAndClear();
+    dataSet.setValue("isEntered", true);
 
 
+    dataSet.setValue("name", name);
+    dataSet.setValue("pass", dataSet.value(name).toString());
+}
 
+void MyClient::accauntValidation(QString name, QString pass)           // this check accaunt existance using server
+{
+    acc_check = true;
 
+    QCryptographicHash passHash(QCryptographicHash::Keccak_256);
+    passHash.addData(pass.toUtf8());
 
+    QString hashedPass = QString::fromStdString(passHash.result().toHex().toStdString());
 
+    Sender("(" + name + "#" + hashedPass + ")getAllData!");
+}
 
+void MyClient::clrAccaunt(QString name)
+{
 
+    if (!dataSet.value("accList").toStringList().empty())
+    {
+        dataSet.remove(name);                                                // remove log-pass
+        QStringList tmp_list = dataSet.value("accList").toStringList();      // remove in accaunts list
+        int i;
+        for (i = 0; i < tmp_list.size(); ++i)
+        {
+            if (tmp_list[i] == name)
+                break;
+        }
+        tmp_list.removeAt(i);
+        dataSet.setValue("accList", tmp_list);
+        switchToAccaunt(dataSet.value("accList").toStringList()[0]);
+    }
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void MyClient::refreshAccList()
+{
+    emit startFillAccList();
+}
 
 
 

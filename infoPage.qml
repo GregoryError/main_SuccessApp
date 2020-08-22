@@ -13,7 +13,7 @@ Item {
             width: backGroundTP.width
             height: backGroundTP.height
             anchors.horizontalCenter: backGroundTP.horizontalCenter
-            contentHeight: aboutTxt.height + e_mail.height + 200
+            contentHeight: aboutTxt.height + e_mail.height + 1000
             contentWidth: parent.width
             smooth: true
             boundsBehavior: Flickable.StopAtBounds
@@ -33,7 +33,7 @@ Item {
                 // 36_armeabi_v7a   38_armeabi_v7a   39_arm_v8a
                 // 40_v7a_API_23-28  38_v7a_API_19-22
                 text: "    Успех личный кабинет код версии: <br>
-                           43_v8_API_23-28 <br>
+                           44_v7_API_19-29 <br>
                            Данное приложение издается как <br>
                            приложение с открытым исходным кодом, <br>
                            оно является бесплатым <br>
@@ -71,7 +71,7 @@ Item {
             Text {
                 id: e_mail
                 anchors.top: aboutTxt.bottom
-                anchors.topMargin: 45
+                anchors.topMargin: 50
                 anchors.horizontalCenter: aboutTxt.horizontalCenter
                 horizontalAlignment: Text.AlignHCenter
                 font.pointSize: 18
@@ -83,40 +83,6 @@ Item {
 }
 
 
-
-//            Button {
-//                id: aboutTxt
-//                z: 4
-//                anchors.top: parent.top
-//                anchors.topMargin: 10
-//                width: backGroundTP.width * 0.5
-//                height: backGroundTP.height * 0.2 - 10
-//                anchors.horizontalCenter: parent.horizontalCenter
-//                text: "Push for token"
-
-//                onClicked: {
-//                    forTokenWnd.text = BackEnd.testSlot()
-//                }
-//            }
-
-//            TextArea {
-//                id: forTokenWnd
-//                visible: true
-//                width: parent.width * 0.8
-//                height: parent.height * 0.8
-//                anchors.horizontalCenter: parent.horizontalCenter
-//                anchors.top: aboutTxt.bottom
-//                anchors.topMargin: 10
-//                font.pointSize: 18
-//                wrapMode: TextEdit.Wrap
-//                z: 6
-//                background: Rectangle{
-//                    color: "#fefefe"
-//                    anchors.fill: parent
-//                    radius: 4
-//                }
-
-//            }
 
 
 

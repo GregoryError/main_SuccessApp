@@ -1,8 +1,5 @@
-//import QtQuick 2.0
 import QtQuick 2.7
 import QtQuick.Controls 2.2
-//import QtQuick.Dialogs 1.1
-
 
 
 Item {
@@ -33,23 +30,6 @@ Item {
 
         }
     }
-
-    //  MessageDialog {
-    //      id: messageDialog
-    //      title: "Временный платеж"
-    //      onAccepted: {
-    //          // Qt.quit()
-    //      }
-    //      Component.onCompleted: visible = false
-    //
-    //  }
-
-
-
-    //    Rectangle{
-    //        id: backRect
-    //        anchors.fill: parent
-    //        color: "#f7f7f7"
 
     Image {
         id: backGroundTP

@@ -16,9 +16,18 @@
 #include <QGuiApplication>
 #include <cmath>
 
+#include <QAndroidJniObject>
+#include <QtAndroidExtras>
+#include <QAndroidJniEnvironment>
+#include <QJsonDocument>
+#include <QJsonObject>
+
+#include <notificationworker.h>
+
 
 //#include <QSplashScreen>
 //#include <QPixmap>
+
 
 class location
 {
@@ -49,7 +58,6 @@ public:
         location own(t_long, t_lat);
         return ShowDiff(own, temp) > ShowDiff(own, obj);
     }
-
 };
 
 
@@ -70,6 +78,27 @@ public:
     QGeoPositionInfoSource *source = QGeoPositionInfoSource::createDefaultSource(this);
     QRect displaySize;
 
+    // --------- sandbox --------------
+
+    Q_INVOKABLE void crash();
+
+    Q_INVOKABLE void getEvents();
+
+    Q_INVOKABLE void sendNotification();
+
+    NotificationWorker &notification = NotificationWorker::instansce();
+
+signals:
+    void sendigMessage(QJsonObject obj);
+    void handleEvents(QJsonArray events);
+
+    void openMsg();
+
+public slots:
+    void registrToken(QString);
+
+    // --------- sandbox --------------
+
 
 public slots:
     void trustedPay();
@@ -84,10 +113,13 @@ public slots:
     double p_owner_long();
     double p_owner_lat();
 
-    QString getToken();
+    QString getTok();
     int p_count();
     void shareLink();
 
+    void gotMsg();
+
+    QString getAct();
 };
 
 

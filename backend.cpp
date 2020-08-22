@@ -9,14 +9,8 @@
 BackEnd::BackEnd(QObject *parent) :
     QObject(parent)
 {
-
-    //displaySize = QApplication::desktop()->availableGeometry();
-
     cont = engine.rootContext();
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-    //engine.load(QUrl(QStringLiteral("qrc:/homePage.qml")));
-    //engine.load(QUrl(QStringLiteral("qrc:/payments.qml")));
-
 
     cont->setContextProperty("BackEnd", this);
 
@@ -61,9 +55,47 @@ BackEnd::BackEnd(QObject *parent) :
     cashpoints.push_back(location(60.707622, 28.753213, "пр. Ленина 9/Кутузова,<br> Сбербанк", owner.longitude, owner.latitude));
     cashpoints.push_back(location(60.700772, 28.783921, "ул. Транспортная 1<br> Сбербанк ATM", owner.longitude, owner.latitude));
 
-
     std::sort(cashpoints.begin(), cashpoints.end());
+
+
+
+    connect(&notification, QOverload<QJsonObject>::of(&NotificationWorker::sendingMessage),
+            this,  QOverload<QJsonObject>::of(&BackEnd::sendigMessage));
+
+    connect(&notification, QOverload<QString>::of(&NotificationWorker::updateToken),
+            this,  QOverload<QString>::of(&BackEnd::registrToken));
+
+    connect(&notification, SIGNAL(msgReceived()),
+            this, SLOT(gotMsg()));
+
+    qDebug() << notification.getToken();
+
 }
+
+void BackEnd::registrToken(QString str)
+{
+    qDebug() << "new token:" << str;
+}
+
+void BackEnd::crash()
+{
+    QString *str = nullptr;
+    str->clear();
+}
+
+void BackEnd::getEvents()
+{
+    QJsonArray events = notification.getEvents();
+    notification.eventsClear();
+    emit handleEvents(events);
+}
+
+void BackEnd::sendNotification()
+{
+    notification.sendNotification("Test Title", "Test Body");
+}
+
+
 
 void BackEnd::trustedPay()
 {
@@ -178,20 +210,33 @@ void BackEnd::shareLink()
 
 }
 
+void BackEnd::gotMsg()
+{
+    emit openMsg();
+}
 
-QString BackEnd::getToken()
+QString BackEnd::getTok()
 {
     QAndroidJniObject stringNumber =
             QAndroidJniObject::callStaticObjectMethod("com/success/android/firebasetest/ListenerService",
                                                       "getToken",
                                                       "(I)Ljava/lang/String;",
                                                       10);
-   // qDebug() << "token:" << stringNumber.toString();
+    // qDebug() << "token:" << stringNumber.toString();
     return stringNumber.toString();
 }
 
 
+QString BackEnd::getAct()
+{
+    QAndroidJniObject stringNumber =
+            QAndroidJniObject::callStaticObjectMethod("com/success/android/firebasetest/ListenerService",
+                                                      "getAction",
+                                                      "(I)Ljava/lang/String;",
+                                                      10);
+    return stringNumber.toString();
 
+}
 
 //////////////////////////////////////////////////////////
 

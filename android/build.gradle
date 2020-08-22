@@ -13,6 +13,7 @@ buildscript {
         //classpath 'com.android.tools.build:gradle:2.2.3'
         classpath 'com.android.tools.build:gradle:3.4.2'
         classpath 'com.google.gms:google-services:4.0.1'
+
     }
 }
 
@@ -170,6 +171,7 @@ dependencies {
     implementation fileTree(dir: 'src', include: ['*.jar'])
 
     implementation 'com.android.support:appcompat-v7:27.1.1'
+
 
     // Deprecated / old way. Use "apply from" as below
     implementation 'com.google.android.gms:play-services-base:15.0.1'  // Mandatory - Firebase rely on Google Play services

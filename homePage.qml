@@ -23,60 +23,36 @@ Item {
     Connections{
         target: myClient
         onStartReadInfo: {
-//            if (myClient.is_Show_Val_Quest())
-//                val_wnd_anim_on.start()
 
+            // check if push was received
+            if (BackEnd.getAct() === "rec")
+            {
+                myClient.makeBusyON();
+                myClient.askForMsgs();
+                stackView.push("messagePage.qml", {"objectName": "messagePage"});
+            }
+            else
+            {
 
-            billVal.text = myClient.showBill();
-            billVal.color = myClient.showState() ? "#f7f7f7" : "#f31010"
-            planName.text = myClient.showPlan();
-            countTxt.text = "Личный счет: " + myClient.showId();
-            dateTxt.text = "Расчетный день: " + myClient.showPay_day() + "  (" + myClient.nextPayDay() + ")";
+                billVal.text = myClient.showBill();
+                billVal.color = myClient.showState() ? "#f7f7f7" : "#f31010"
+                planName.text = "Ваш пакет: " + myClient.showPlan();
+                countTxt.text = "Личный счет: " + myClient.showId();
+                dateTxt.text = "Расчетный день: " + myClient.showPay_day() + "  (" + myClient.nextPayDay() + ")";
 
-            bill.text = "Баланс на сегодня " + myClient.serverTime();
+                bill.text = "Внесено на баланс. Данные на " + myClient.serverTime();
 
-            //console.log(myClient.nextPayDay() + " - NEXT DATE FOR PAY");
+                //console.log(myClient.nextPayDay() + " - NEXT DATE FOR PAY");
 
-            myClient.switchToMe();
+                myClient.switchToMe();
 
-            infoRectcolorRect.y = 10
-            infoRectcolorRect.x = 10
-            infoRectcolorRectcleAnimation.start()
-            infoRectcolorRectOpacityAnimation.start()
-
+                infoRectcolorRect.y = 15
+                infoRectcolorRect.x = 15
+                infoRectcolorRectcleAnimation.start()
+                infoRectcolorRectOpacityAnimation.start()
+            }
         }
     }
-
-//    Rectangle {
-//        id: user_value_rect
-//        width: Screen.width
-//        height: Screen.height
-//        anchors.fill: parent
-//        color: "black"
-//        visible: false
-//        opacity: 0
-//    }
-
-//    OpacityAnimator {
-//        id: val_wnd_anim_on
-//        target: user_value_rect
-//        from: 0
-//        to: 0.7
-//        duration: 600
-//        onStarted: user_value_rect.visible = true
-//        running: false
-//    }
-
-//    OpacityAnimator {
-//        id: val_wnd_anim_off
-//        target: user_value_rect
-//        from: 0.7
-//        to: 0
-//        duration: 600
-//        onStopped: user_value_rect.visible = false
-//        running: false
-//    }
-
 
     Item{
         id: infoRect
@@ -84,11 +60,6 @@ Item {
         height: (mainwnd.height * 0.3) + 10
         anchors.top: mainwnd.top
         anchors.horizontalCenter: parent.horizontalCenter
-       // anchors.topMargin: 0
-        //z: 3
-        // visible: false
-        //clip: true
-
         Component.onCompleted: focus = true
 
         Image {
@@ -107,10 +78,8 @@ Item {
                 anchors.fill: parent
                 onClicked: {
                     myClient.makeBusyON(); stackView.push("qrc:/payDescribe.qml");
-
                 }
             }
-
         }
 
         Text{
@@ -346,7 +315,7 @@ Item {
             properties: "width,height,radius"
             from: 0
             to: infoRect.width * 10
-            duration: 1500
+            duration: 900
 
             onStopped: {
                 infoRectcolorRect.width = 0
@@ -361,7 +330,7 @@ Item {
             properties: "opacity"
             from: 1
             to: 0
-            duration: 1600
+            duration: 1000
 
             onStopped: {
                 myClient.postWorker();
@@ -413,15 +382,12 @@ Item {
 
         ListElement {
             mycolor: "#2cbaf1"
-            //            backdata: "qrc:/Menu/oursite.png"
             backdata: "qrc:/Menu/report_issue.png"
             active: true
-            //            mtext: "Наш сайт"
             mtext: "Решить проблему"
         }
 
     }
-
 
     Rectangle{
         id: bigMenu
@@ -431,24 +397,6 @@ Item {
         radius: 2
         anchors.top: infoRect.bottom
         anchors.topMargin: -20         // WTF
-        // smooth: true
-
-//        DropShadow {
-//            id: bigMenuShadow
-//            anchors.fill: bigMenu
-//            cached: true
-//            //horizontalOffset: 3
-//            verticalOffset: 4
-//            //horizontalOffset: 4
-
-//            radius: 14
-//            samples: 10
-//            //color: "#80000000"
-//            color: "steelblue"
-//            smooth: true
-//            source: bigMenu
-//            opacity: 0.4
-//        }
 
         GridView{
             id: cells
@@ -497,6 +445,7 @@ Item {
                                 visible: false
                                 color: "#93deff"
                                 opacity: 0.6
+
 
                                 transform: Translate {
                                     x: -bigMenucolorRect.width / 2
@@ -567,17 +516,7 @@ Item {
 
                             cellButtoncircleAnimation.start()
 
-
-
-                            //if (index === 0)
-                            //    stackView.push("payments.qml")
-
-
-                            // console.log(index)
-
-
                         }
-
 
                         ColorAnimation {
                             id: onPressedAnim
@@ -589,7 +528,6 @@ Item {
                             to: "#C4EDFF"
                             //easing.type: Easing.InExpo;
                         }
-
 
                         Timer{
                             id: operationTimer
@@ -603,11 +541,10 @@ Item {
                                 case 2: stackView.push("trustedPayPage.qml"); break;
                                 case 3: myClient.makeBusyON();
                                     myClient.askForMsgs();
-                                    stackView.push("messagePage.qml"); break;
+                                    stackView.push("messagePage.qml", {"objectName": "messagePage"}); break;
                                 case 4: BackEnd.callUs(); break;
                                 case 5: stackView.push("issue_report.qml"); break;                  //BackEnd.goUrl(); break;
                                 }
-
                             }
                         }
 
@@ -671,10 +608,7 @@ Item {
 
 
                             }
-
-
                         }
-
 
                     }
 

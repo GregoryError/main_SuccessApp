@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
         app.quit();
     }
 
-    client->saveToken(obj->getToken());   // FCM token
+    client->saveToken(obj->getTok());   // FCM token
 
     return app.exec();
 }

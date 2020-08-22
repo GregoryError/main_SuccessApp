@@ -19,6 +19,15 @@ ApplicationWindow {
     id: window
     visible: true
 
+    onClosing: {
+        if(stackView.depth > 1){
+            close.accepted = false
+            stackView.pop();
+        }else{
+            return;
+        }
+    }
+
 
     Component.onCompleted: {
         console.log("Screen data: " + Screen.desktopAvailableHeight);
@@ -26,20 +35,7 @@ ApplicationWindow {
 
     }
 
-    //height: Screen.desktopAvailableHeight
-    //width: Screen.desktopAvailableWidth
-
-    // width: 540
-    // height: 960
-    // width: 430
-    // height: 850
-    // width: 1080
-    // height: 1920
-    //    width: Screen.width
-    //    height: Screen.height
-
     FontLoader { id: openSansCondensed; source: "/fonts/openSansCondensed_Light.ttf"; onStatusChanged: if (loader.status === FontLoader.Ready) console.log('Loaded') }
-
 
     Rectangle {
         id: user_value_rect
@@ -124,11 +120,6 @@ ApplicationWindow {
                     }
                 }
             }
-
-
-
-
-
         }
     }
 
@@ -217,10 +208,6 @@ ApplicationWindow {
             anchors.top: userLoginImg.bottom
             anchors.horizontalCenter: mainStartForm.horizontalCenter
             anchors.topMargin: -5
-            //y:
-
-            // color: "orange"
-
 
             OpacityAnimator {
                 id: appearstartform
@@ -258,13 +245,9 @@ ApplicationWindow {
 
 
             Column {
-                //anchors.centerIn: parent
-                //anchors.topMargin: 50
                 anchors.horizontalCenter: startform.horizontalCenter
-                //spacing: 5
                 Column {
                     id: nameField
-                    //spacing: -10
                     TextField{
                         id: nameInput
                         maximumLength: 20
@@ -274,7 +257,7 @@ ApplicationWindow {
                                           Qt.ImhNoAutoUppercase |
                                           Qt.ImhNoPredictiveText
                         horizontalAlignment: TextInput.AlignHCenter
-
+                        font.bold: true
 
                         background: Rectangle {
                             opacity: 0
@@ -320,6 +303,7 @@ ApplicationWindow {
                                           Qt.ImhNoAutoUppercase |
                                           Qt.ImhNoPredictiveText
                         horizontalAlignment: TextInput.AlignHCenter
+                        font.bold: true
 
                         background: Rectangle {
                             opacity: 0
@@ -412,12 +396,6 @@ ApplicationWindow {
                                 loginButtoncircleAnimation.start()
                                 loginButtonOpacityAnimation.start()
 
-
-
-                                console.log(nameInput.text, passwordInput.text)
-
-                                //firsttimer.running = true
-
                             }
                         }
 
@@ -452,60 +430,6 @@ ApplicationWindow {
 
                         }
                     }
-
-                    //                    Rectangle{
-                    //                        id: order
-                    //                        radius: 5
-                    //                        clip: true
-                    //                        color: "#112d4e"
-
-
-                    //                        implicitWidth: startform.width - 20
-                    //                        implicitHeight: startform.height / 5 - 15
-
-                    //                        Text{
-
-                    //                            anchors.centerIn: parent
-                    //                            color: "white"
-                    //                            font.pointSize: order.width  * 0.1
-                    //                            font.family: openSansCondensed.name;
-                    //                            text: "Подключиться";
-                    //                        }
-
-                    //                        Rectangle {
-                    //                            id: ordercolorRect
-                    //                            height: 10
-                    //                            width: 10
-                    //                            visible: false
-                    //                            color: "#f7f7f7"
-
-                    //                            transform: Translate {
-                    //                                x: -ordercolorRect.width / 2
-                    //                                y: -ordercolorRect.height / 2
-                    //                            }
-                    //                        }
-
-                    //                        MouseArea {
-                    //                            anchors.fill: parent
-                    //                            onPressed: {
-
-                    //                                Qt.inputMethod.hide();
-
-                    //                                ordercolorRect.x = mouseX
-                    //                                ordercolorRect.y = mouseY
-                    //                                orderButtonCircleAnimation.start()
-                    //                            }
-
-
-                    //                            onClicked:{
-                    //                                //circleAnimation.stop()
-                    //                                console.log("guest")
-                    //                            }
-
-                    //                        }
-                    //                    }
-
-
                 }
             }
         }
@@ -519,7 +443,6 @@ ApplicationWindow {
             // Qt.quit()
         }
         Component.onCompleted: visible = false
-
     }
 
     Connections{
@@ -542,7 +465,6 @@ ApplicationWindow {
                 bigbusy.running = false
                 messageDialog.visible = true;
             }
-
         }
 
         onBusyON:{
@@ -554,12 +476,20 @@ ApplicationWindow {
         }
     }
 
+    Connections {
+        target: BackEnd
+        onOpenMsg:{
+            if (stackView.currentItem.objectName != "messagePage")
+            {
+                bigbusy.running = true
+                stackView.push("messagePage.qml", {"objectName": "messagePage"});
+            }
 
+        }
+    }
 
 
     //////////////////////////////////////////// END OF START-FORM ///////////////////////////////////////////////
-
-
 
 
     Item {
@@ -567,23 +497,6 @@ ApplicationWindow {
         anchors.fill: parent
         visible: startform.visible? false : true
         enabled: startform.visible? false : true
-
-        // LinearGradient {
-        //     id: backGrad
-        //     width: window.width
-        //     height: window.height * 0.3 + 50
-        //     x: 0
-        //     y: 0
-        //     //visible: false
-        //     start: Qt.point(0, 0)
-        //     end: Qt.point(window.width, window.width)
-        //     gradient: Gradient {
-        //         GradientStop { position: 0.0; color: "#93deff" }
-        //         GradientStop { position: 0.3; color: "#638AA1" }
-        //         GradientStop { position: 0.4; color: "#4B6072" }
-        //         GradientStop { position: 0.6; color: "#323643" }
-        //         GradientStop { position: 1.0; color: "#212121" }
-        //     }
 
 
         Image {
@@ -596,22 +509,6 @@ ApplicationWindow {
 
 
         }
-
-
-//        DropShadow {
-//            id: backhadow
-//            anchors.fill: backGrad
-//            cached: true
-//            //horizontalOffset: 3
-//            verticalOffset: 2
-//            radius: 2.0
-//            samples: 5
-//            color: "#80000000"
-//            //smooth: true
-//            source: backGrad
-//            opacity: 0.4
-//        }
-
 
         Item{
             id: bar
@@ -835,9 +732,6 @@ ApplicationWindow {
 
                 }
 
-
-
-
                 Rectangle{
                     id: vLine
                     anchors.horizontalCenter: drawLogo.horizontalCenter
@@ -862,7 +756,6 @@ ApplicationWindow {
                     lineHeight: 1.2
                 }
 
-
                 Text {
                     id: telN
                     font.family: openSansCondensed.name;
@@ -875,30 +768,6 @@ ApplicationWindow {
                     anchors.verticalCenter: vLine.verticalCenter
                     lineHeight: 1.2
                 }
-
-
-
-
-                // paysArea
-                // p_paysArea
-                // trustedArea
-                // msgArea
-                // callArea
-
-
-                //
-                //
-                //   PropertyAnimation{
-                //       property: "x"
-                //       easing.amplitude: 0.1
-                //       easing.type: Easing.OutBack
-                //       from: - Screen.width
-                //       to: 0
-                //       duration: 500
-                //       running: drawer.opened? true : false
-                //       target: paysArea
-                //
-                //   }
 
 
                 MouseArea{
@@ -1068,7 +937,7 @@ ApplicationWindow {
                         drawer.close()
                         myClient.makeBusyON();
                         myClient.askForMsgs();
-                        stackView.push("messagePage.qml");
+                        stackView.push("messagePage.qml", {"objectName": "messagePage"});
                     }
 
                     Image {
@@ -1108,44 +977,46 @@ ApplicationWindow {
 
                 }
 
+
+
                 MouseArea{
-                    id: callArea
+                    id: multiArea
                     anchors.top: msgArea.bottom
                     width: drawer.width
                     height: 50
 
                     onClicked: {
                         drawer.close()
-                        BackEnd.callUs();
+                        stackView.push("multi_ac.qml");
                     }
 
                     Image {
-                        id: callImg
-                        source: "qrc:/Menu/ringer-volume.png"
-                        anchors.left: callArea.left
+                        id: multiImg
+                        source: "qrc:/Menu/multi_ac.png"
+                        anchors.left: multiArea.left
                         anchors.leftMargin: 40
-                        anchors.verticalCenter: callArea.verticalCenter
+                        anchors.verticalCenter: multiArea.verticalCenter
                         height: 18
                         width: 18
                     }
 
                     Text {
-                        id: call_name
-                        anchors.left: callImg.right
+                        id: multi_name
+                        anchors.left: multiImg.right
                         anchors.leftMargin: 20
-                        anchors.verticalCenter: callImg.verticalCenter
+                        anchors.verticalCenter: multiImg.verticalCenter
                         font.family: openSansCondensed.name;
                         font.pointSize: window.width / 26
-                        text: "Поддержка"
+                        text: "Мульти-аккаунт"
                         color: "#f7f7f7"
 
                     }
 
                     Image {
-                        id: call_arr
+                        id: multi_arr
                         source: "qrc:/Menu/arrow_forward.png"
-                        anchors.verticalCenter: call_name.verticalCenter
-                        anchors.right: callArea.right
+                        anchors.verticalCenter: multi_name.verticalCenter
+                        anchors.right: multiArea.right
                         anchors.rightMargin: 50
                         height: 18
                         width: 18
@@ -1154,10 +1025,56 @@ ApplicationWindow {
 
                 }
 
+                //                MouseArea{
+                //                    id: callArea
+                //                    anchors.top: msgArea.bottom
+                //                    width: drawer.width
+                //                    height: 50
+
+                //                    onClicked: {
+                //                        drawer.close()
+                //                        BackEnd.callUs();
+                //                    }
+
+                //                    Image {
+                //                        id: callImg
+                //                        source: "qrc:/Menu/ringer-volume.png"
+                //                        anchors.left: callArea.left
+                //                        anchors.leftMargin: 40
+                //                        anchors.verticalCenter: callArea.verticalCenter
+                //                        height: 18
+                //                        width: 18
+                //                    }
+
+                //                    Text {
+                //                        id: call_name
+                //                        anchors.left: callImg.right
+                //                        anchors.leftMargin: 20
+                //                        anchors.verticalCenter: callImg.verticalCenter
+                //                        font.family: openSansCondensed.name;
+                //                        font.pointSize: window.width / 26
+                //                        text: "Поддержка"
+                //                        color: "#f7f7f7"
+
+                //                    }
+
+                //                    Image {
+                //                        id: call_arr
+                //                        source: "qrc:/Menu/arrow_forward.png"
+                //                        anchors.verticalCenter: call_name.verticalCenter
+                //                        anchors.right: callArea.right
+                //                        anchors.rightMargin: 50
+                //                        height: 18
+                //                        width: 18
+
+                //                    }
+
+                //                }
+
                 Rectangle{
                     id: bottomLine
                     anchors.horizontalCenter: drawBack.horizontalCenter
-                    anchors.top: callArea.bottom
+                    anchors.top: multiArea.bottom
                     anchors.topMargin: 5
                     width: drawBack.width * 0.8
                     height: 1
@@ -1324,21 +1241,8 @@ ApplicationWindow {
 
             StackView {
                 id: stackView
-                Component.onCompleted: event.accepted = false;
+                //  Component.onCompleted: event.accepted = false;
 
-
-
-                //   pushEnter: Transition {
-                //             PropertyAnimation {
-                //                 property: "opacity"
-                //                 from: 0
-                //                 to:1
-                //                 duration: 100
-                //             }
-                //   }
-
-
-                //antialiasing: true
                 onDepthChanged: {
                     // myClient.closeIfInProcess();
                     if (stackView.depth === 1)
@@ -1352,11 +1256,6 @@ ApplicationWindow {
                 }
 
                 focus: true
-                Keys.onReleased: if (event.key === Qt.Key_Back && stackView.depth > 1) {
-                                     stackView.pop();
-                                     event.accepted = true;
-                                 }
-
                 initialItem: "homePage.qml"
                 anchors.fill: parent
             }
@@ -1413,7 +1312,7 @@ ApplicationWindow {
                     implicitHeight: window.width / 22
                     //radius: 50
                     radius: 10
-                    color: "#93deff"
+                    color: "white"
                     transform: [
                         Translate {
                             id: trans

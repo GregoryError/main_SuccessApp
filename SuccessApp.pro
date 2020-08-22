@@ -40,6 +40,7 @@ DEFINES += QTFIREBASE_BUILD_MESSAGING
 SOURCES += main.cpp \
     backend.cpp \
     myclient.cpp \
+    notificationworker.cpp \
     permissions.cpp
 
 RESOURCES += qml.qrc \
@@ -61,6 +62,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     backend.h \
     myclient.h \
+    notificationworker.h \
     permissions.h
 
 

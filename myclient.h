@@ -2,12 +2,10 @@
 //#define _MyClient_h_
 #pragma once
 
-//#include "backend.h"
+
 #include <QClipboard>
 #include <QApplication>
 #include <QWidget>
-//#include <QTextEdit>
-//#include <QLineEdit>
 #include <QDataStream>
 #include <QTime>
 #include <QSslSocket>
@@ -15,9 +13,7 @@
 #include <QSettings>
 #include <QByteArray>
 #include <QDateTime>
-//#include <QTextStream>
-//#include <QList>
-//#include <QTimer>
+#include <QStringList>
 
 // ======================================================================
 
@@ -28,6 +24,7 @@ class MyClient : public QObject { //QWidget {
 private:
 
     QString msgToSend;
+    enum add_method{need_hash, no_hash};
 
 public:
     // Q_PROPERTY(QString input WRITE setInputValue
@@ -59,6 +56,10 @@ public:
 
     QClipboard *buf = QApplication::clipboard();
 
+    bool acc_check = false;
+
+    QString link_str;
+
     MyClient(QWidget* pwgt = nullptr);
     void Sender(const QString& msg);
     void connectToHost();
@@ -77,6 +78,11 @@ signals:
     void trustedPayDenied();
     // Messages:
     void startReadMsgs();  // можно начинать читать вектора с сообщениями
+
+
+    void goodValidation();
+    void startFillAccList();
+    void accessDenied();
 
 
 
@@ -124,7 +130,7 @@ public slots:
     void showMsgs();
     void sendMsgs(QString str);
 
-    QString giveMsgLine(int index) { return msg_lines.value(index); }
+    QString giveMsgLine(int index);
     long giveMsgTime(int i) { auto beg = msg_lines.begin(); return (beg + i).key(); }
     int msgMapSize() { return msg_lines.size(); }
 
@@ -148,6 +154,19 @@ public slots:
     bool is_Show_Val_Quest();
     void set_Show_Val_toFalse();
     void postWorker();
+
+    // multi-accaunt
+
+    QString showActiveName();
+    bool addAccaunt(QString name, QString pass, add_method need_hs = need_hash);
+    int accauntListSize();
+    QString getAccauntName(int ind);
+    void switchToAccaunt(QString name);
+    void accauntValidation(QString name, QString pass);
+    void clrAccaunt(QString name);
+    void refreshAccList();
+
+
 
 };
 

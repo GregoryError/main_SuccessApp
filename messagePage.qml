@@ -59,9 +59,9 @@ Item {
         }
 
         Timer {
-            interval: 4500;
+            interval: 4600;
             running: inputLine.focus ?
-                         false : !msgView.moving && !(msgView.indexAt(msgView.width / 2, msgView.contentY) < (msgModel.rowCount() - 12))
+                         false : !msgView.moving && !(msgView.indexAt(msgView.width / 2, msgView.contentY) < (msgModel.rowCount() - 12))       // BLYAD WTF
                          ? true : false
             repeat: true
             onTriggered:{
@@ -71,8 +71,8 @@ Item {
                 {
                     myClient.askForMsgs();
 
-                    console.log("indexAt  = " + msgView.indexAt(msgView.width / 2, msgView.contentY))
-                    console.log("rowCount = " + (msgModel.rowCount() - 10))
+//                    console.log("indexAt  = " + msgView.indexAt(msgView.width / 2, msgView.contentY))
+//                    console.log("rowCount = " + (msgModel.rowCount() - 10))
 
                 }
             }
@@ -104,8 +104,6 @@ Item {
                 msgView.positionViewAtIndex(msgModel.rowCount() -1, msgView.End)
                 msgView.positionViewAtEnd()
             }
-
-
 
         }
 
@@ -160,6 +158,9 @@ Item {
                         //anchors.centerIn: msgUnit
                         color: "#323643"
                         text: txt
+                        // textFormat: Text.RichText
+                        // onLinkActivated: BackEnd.goUrl()
+
                     }
                 }
 
@@ -177,6 +178,7 @@ Item {
                     fontSizeMode: Text.Fit
                     color: "#606470"
                     text: time
+
 
                 }
             }
@@ -240,10 +242,7 @@ Item {
                     myClient.sendMsgs(inputLine.text);
                 inputLine.clear();
 
-
-
                 myClient.checkState();  // debug
-
                 myClient.askForMsgs();
 
             }
@@ -262,7 +261,6 @@ Item {
                 onStopped: {
                     sendButt.enabled = true
                 }
-
 
             }
 
